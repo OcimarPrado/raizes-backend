@@ -1,7 +1,7 @@
 
 from passlib.context import CryptContext
 from app.infrastructure.repositories.usuario_repository import UsuarioRepository
-from app.application.usuario_schema import UsuarioCreate
+from app.application.schemas.usuario_schema import UsuarioCreate
 from fastapi import HTTPException, status
 
 # Configuração do Hash

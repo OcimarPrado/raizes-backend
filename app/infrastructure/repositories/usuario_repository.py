@@ -1,7 +1,7 @@
 
 from sqlalchemy.orm import Session
 from app.domain.usuario import Usuario
-from app.application.usuario_schema import UsuarioCreate
+from app.application.schemas.usuario_schema import UsuarioCreate # type: ignore
 
 class UsuarioRepository:
     def __init__(self, db: Session):
