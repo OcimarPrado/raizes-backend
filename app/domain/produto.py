@@ -1,6 +1,8 @@
+import enum
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric
 from sqlalchemy.sql import func
 from app.infrastructure.database.connection import Base
+
 
 class CategoriaEnum(str, enum.Enum):
     PRATOS_PRINCIPAIS = "PRATOS_PRINCIPAIS"

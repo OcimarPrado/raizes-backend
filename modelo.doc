@@ -1,0 +1,47 @@
+﻿SENHA - HASH
+
+As senhas dos usuários são armazenadas exclusivamente em formato hash bcrypt, garantindo que nem a equipe técnica tenha acesso à senha original, em conformidade com o princípio de segurança da LGPD.
+
+
+ENUM
+
+Os perfis de acesso são controlados via Enum no domínio da aplicação, impedindo valores arbitrários e garantindo consistência no controle de autorização.
+
+
+NULLABLLE
+
+Campos não essenciais ao funcionamento do sistema, como telefone, são opcionais em conformidade com o princípio de minimização de dados da LGPD.
+
+
+UPDATE_AT
+
+A tabela de estoque registra apenas o saldo atual com updated_at, enquanto cada movimentação gera um novo registro imutável em estoque_movimentacoes, garantindo rastreabilidade completa das entradas e saídas por unidade.
+
+
+ITEM_PEDIDO
+
+O preço unitário é armazenado em ItemPedido no momento da criação do pedido, garantindo imutabilidade do histórico financeiro independente de atualizações futuras no cadastro de produtos.
+
+
+
+O fluxo real passo a passo:
+1. usuario — cliente já cadastrado faz login. Não é vinculado a nenhuma unidade específica — ele pode pedir em qualquer unidade da rede.
+2. pedido — é criado com usuario_id, unidade_id, canal_pedido e status AGUARDANDO_PAGAMENTO.
+3. item_pedido — para cada produto escolhido, cria um registro com pedido_id, produto_id, quantidade e congela o preco_unitario. O total do pedido é calculado e salvo em pedido.total.
+4. estoque — antes de confirmar o pedido, o sistema verifica se tem quantidade disponível. Se não tiver → erro 409. Se tiver → reserva a quantidade.
+5. pagamento — criado com status AGUARDANDO. O mock processa e retorna APROVADO ou RECUSADO.
+6. Se aprovado:
+    • pedido.status → CONFIRMADO 
+    • estoque.quantidade_disponivel → decrementado 
+    • estoque_movimentacao → registra a saída 
+    • fidelidade → calcula se gerou cupom (total ÷ R$20) 
+    • fidelidade_historico → registra o ganho 
+7. Se recusado:
+    • pedido.status → continua AGUARDANDO_PAGAMENTO 
+    • Estoque não é alterado 
+    • Cliente pode tentar novo pagamento
+
+
+
+
+
