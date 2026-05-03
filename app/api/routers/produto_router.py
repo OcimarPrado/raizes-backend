@@ -8,6 +8,7 @@ from app.api.dependencies.auth import get_current_user
 from app.application.schemas.produto_schema import ProdutoCreate, ProdutoResponse
 from app.infrastructure.repositories.produto_repository import ProdutoRepository
 from app.domain.produto import Produto
+from app.infrastructure.repositories.usuario_repository import Usuario
 
 # Criamos a rota com o nome 'produtos'
 router = APIRouter(prefix="/produtos", tags=["Produtos do Cardápio"])
@@ -46,3 +47,61 @@ def listar_todos_os_produtos(db: Session = Depends(get_db)):
 
     # 3. Lista todos os produtos
     return produtos 
+
+@router.put("/{produto_id}", response_model=ProdutoResponse)
+def atualizar_produto(
+    produto_id: int,
+    produto_atualizado: ProdutoCreate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user) # Exige login
+):
+    """
+    Endpoint para atualizar dados de um produto.
+    Verifica se o ID existe antes de fazer alteração.
+    """
+
+    repositorio = ProdutoRepository(db)
+
+    # 1. Busca o produto original no banco.
+    produto_existente = repositorio.buscar_por_id(produto_id)
+
+    # 2. Se n~so existir retorna ERRO 404 - Not Found
+    if not produto_existente:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    # 3. Mapeando novos dados para o objeto do banco.
+    produto_existente.nome = produto_atualizado.nome
+    produto_existente.descricao = produto_atualizado.descricao
+    produto_existente.preco = produto_atualizado.preco
+    produto_existente.categoria = produto_atualizado.categoria
+
+    # 4. Salva e retorna o produto modificado.
+    return repositorio.atualizar(produto_existente)
+
+# Rota para remover um produto (DELETE)
+@router.delete("/{produto_id}", status_code=204)
+def deletar_produto(
+    produto_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user) # Exige login
+):
+    
+    """
+    Endpoint para deletar um produto.
+    Retorna 204 quando a exclusão é bem sucedida.
+    """
+
+    repositorio = ProdutoRepository(db)
+
+    # 1. Tenta localizar o item
+    produto = repositorio.buscar_por_id(produto_id)
+
+    # 2. Se não achar o ID, avisa que não existe.
+    if not produto:
+        raise HTTPException(status_code=404, detail="Produto não encontrado.")
+    
+    # 3. Executa remoção do item 
+    repositorio.deletar(produto)
+
+    # 4. Retorna vazio
+    return None

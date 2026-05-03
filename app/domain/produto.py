@@ -12,6 +12,7 @@ class CategoriaEnum(str, enum.Enum):
     FRUTOS_DO_MAR = "FRUTOS_DO_MAR"
     BEBIDAS = "BEBIDAS"
     SOBREMESAS = "SOBREMESAS"
+    LANCHES = "LANCHES"
 
 
 

@@ -36,3 +36,29 @@ class ProdutoRepository:
 
         # O SQLAlchemy faz a tradução para SQL 
         return self.db.query(Produto).all()
+
+    def buscar_por_id(self, produto_id: int):
+        """
+        Localizando um registro único pelo ID.
+        """
+
+        return self.db.query(Produto).filter(Produto.id == produto_id).first()
+
+    def atualizar(self, produto_db: Produto):
+        """
+        Sincronizando alterações do objeto Python com o banco de dados.
+        O 'refresh' garante que tenhamos o dado atualizado após o commit.
+        """
+
+        self.db.add(produto_db)
+        self.db.commit()
+        self.db.refresh(produto_db)
+        return produto_db
+
+    def deletar(self, produto_db: Produto):
+        """
+        Remove permanentemente o registro da tabela de produtos.
+        """
+        self.db.delete(produto_db)
+        self.db.commit()
+            
