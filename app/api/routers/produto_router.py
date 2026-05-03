@@ -32,3 +32,17 @@ def criar_produto_novo(
     
     # 4. Entregamos o produto cadastrado para quem pediu
     return item_salvo
+
+@router.get("/", response_model=list[ProdutoResponse])
+def listar_todos_os_produtos(db: Session = Depends(get_db)):
+    """
+    Rota lista  todos os produtos. Visto que o cardápio é público, não usamos 'get_current_user'.
+    """
+    # 1. Chamada do estoque.
+    repositorio = ProdutoRepository(db)
+
+    # 2. Busca de produtos em estoque.
+    produtos = repositorio.buscar_todos()
+
+    # 3. Lista todos os produtos
+    return produtos 

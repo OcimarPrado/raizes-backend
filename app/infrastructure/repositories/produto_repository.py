@@ -28,3 +28,11 @@ class ProdutoRepository:
         Vai até a prateleira e traz a lista de todos os produtos cadastrados.
         """
         return self.db.query(Produto).all()
+    
+    def buscar_todos(self):
+        """
+        Continuando o processo de CRUD e implementando a função READ.
+        """
+
+        # O SQLAlchemy faz a tradução para SQL 
+        return self.db.query(Produto).all()
