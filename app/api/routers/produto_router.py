@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,HTTPException
 from sqlalchemy.orm import Session
 
 # Importamos as ferramentas que a gente já construiu antes
@@ -79,7 +79,7 @@ def atualizar_produto(
     return repositorio.atualizar(produto_existente)
 
 # Rota para remover um produto (DELETE)
-@router.delete("/{produto_id}", status_code=204)
+@router.delete("/{produto_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_produto(
     produto_id: int,
     db: Session = Depends(get_db),
@@ -98,7 +98,10 @@ def deletar_produto(
 
     # 2. Se não achar o ID, avisa que não existe.
     if not produto:
-        raise HTTPException(status_code=404, detail="Produto não encontrado.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Produto com ID {produto_id} não encontrado no cardápio."
+            )
     
     # 3. Executa remoção do item 
     repositorio.deletar(produto)

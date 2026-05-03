@@ -1,8 +1,29 @@
 from fastapi import FastAPI
 from app.api.routers import usuario_router, auth_router, produto_router
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # Criação da aplicação principal. É aqui que o sistema ganha um nome e começa a existir.
 app = FastAPI(title="Raízes do Nordeste API")
+
+
+
+# Configuração de origens permitidas
+origins = [
+    "http://localhost:3000", # Porta padrão do React antigo
+    "http://localhost:5173", # Porta padrão do Vite/React moderno
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Permite todos os verbos (GET, POST, PUT, DELETE)
+    allow_headers=["*"], # Permite todos os cabeçalhos (incluindo o seu Token JWT)
+)
+
+
 
 # --- REGISTRO DE ROTAS (Departamentos - Em vez de colocar 50 funções dentro de um arquivo só (o que seria uma bagunça),
 # nós usamos os routers. Cada um cuida de um assunto: um para Usuários, um para Segurança (auth) e um para Produtos.) ---
