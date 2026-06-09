@@ -1,49 +1,33 @@
 from fastapi import FastAPI
-from app.api.routers import usuario_router, auth_router, produto_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routers import usuario_router, auth_router, produto_router, unidade_router, estoque_router
 
+app = FastAPI(
+    title="Raízes do Nordeste API",
+    description="API de gerenciamento da rede de lanchonetes Raízes do Nordeste.",
+    version="1.0.0"
+)
 
-# Criação da aplicação principal. É aqui que o sistema ganha um nome e começa a existir.
-app = FastAPI(title="Raízes do Nordeste API")
-
-
-
-# Configuração de origens permitidas
 origins = [
-    "http://localhost:3000", # Porta padrão do React antigo
-    "http://localhost:5173", # Porta padrão do Vite/React moderno
-    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"], # Permite todos os verbos (GET, POST, PUT, DELETE)
-    allow_headers=["*"], # Permite todos os cabeçalhos (incluindo o seu Token JWT)
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-
-
-# --- REGISTRO DE ROTAS (Departamentos - Em vez de colocar 50 funções dentro de um arquivo só (o que seria uma bagunça),
-# nós usamos os routers. Cada um cuida de um assunto: um para Usuários, um para Segurança (auth) e um para Produtos.) ---
-
-# Se imaginarmos cada include_router como uma porta, teremos:
-
-# Porta para cuidar de quem usa o sistema (Cadastro, Perfil)
-app.include_router(usuario_router.router)
-
-# Porta para a segurança: onde o usuário troca senha por um Token (A chave digital)
 app.include_router(auth_router.router)
-
-# Porta para o cardápio: onde gerenciamos os itens do Raízes do Nordeste
+app.include_router(usuario_router.router)
 app.include_router(produto_router.router)
-
+app.include_router(unidade_router.router)
+app.include_router(estoque_router.router)
 
 @app.get("/")
 def read_root():
-    """
-    Esta é a rota de boas-vindas. 
-    Se você acessar o endereço base da API, ela te responde que está viva e funcionando.
-    """
-    return {"message": "Bem-vindo à API Raízes do Nordeste!"}
+    return {"message": "Bem-vindo à API Raízes do Nordeste!", "docs": "/docs"}
