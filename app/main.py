@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import usuario_router, auth_router, produto_router, unidade_router, estoque_router
+from app.api.routers import usuario_router, auth_router, produto_router, unidade_router, estoque_router, pedido_router
 
 app = FastAPI(
     title="Raízes do Nordeste API",
@@ -27,6 +27,7 @@ app.include_router(usuario_router.router)
 app.include_router(produto_router.router)
 app.include_router(unidade_router.router)
 app.include_router(estoque_router.router)
+app.include_router(pedido_router.router)
 
 @app.get("/")
 def read_root():
