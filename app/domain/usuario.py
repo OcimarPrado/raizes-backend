@@ -20,7 +20,7 @@ class Usuario(Base):
 	cpf = Column(String(11), unique=True, nullable=False)
 	telefone = Column(String(15), nullable=True)
 	role = Column(Enum(RoleEnum), nullable=False, default=RoleEnum.CLIENTE)
-	ativo = Column(Boolean, default=True)
+	ativo = Column(Boolean, nullable=False, default=True, server_default="true")
 	created_at = Column(DateTime(timezone=True), server_default=func.now())
 # As senhas dos usuários são armazenadas exclusivamente em formato hash bc>
 # garantindo que nem a equipe técnica tenha acesso à senha original,
