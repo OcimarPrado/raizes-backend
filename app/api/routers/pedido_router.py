@@ -6,6 +6,7 @@ from app.infrastructure.database.connection import get_db
 from app.api.dependencies.auth import get_current_user
 from app.application.pedido_service import PedidoService
 from app.infrastructure.repositories.pedido_repository import PedidoRepository
+from app.application.fidelidade_service import FidelidadeService
 from app.application.schemas.pedido_schema import PedidoCreate, PedidoResponse, StatusUpdate
 from app.domain.pedido import StatusPedidoEnum, CanalPedidoEnum
 from app.domain.usuario import RoleEnum

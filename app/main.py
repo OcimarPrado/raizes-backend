@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app.api.routers import usuario_router, auth_router, produto_router, unidade_router, estoque_router, pedido_router
 from app.api.routers.pagamento_router import router as pagamento_router
 from app.api.routers.audit_log_router import router as audit_log_router
+from app.api.routers.fidelidade_router import router as fidelidade_router
 from app.api.exception_handlers import validation_exception_handler, integrity_error_handler, generic_exception_handler
 
 app = FastAPI(
@@ -40,6 +41,7 @@ app.include_router(estoque_router.router)
 app.include_router(pedido_router.router)
 app.include_router(pagamento_router)
 app.include_router(audit_log_router)
+app.include_router(fidelidade_router)
 
 @app.get("/")
 def read_root():
