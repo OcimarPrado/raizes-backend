@@ -11,7 +11,7 @@ class Unidade(Base):
     cidade = Column(String, nullable=False)
     estado = Column(String(2), nullable=False)
     endereco = Column(String, nullable=False)
-    ativa = Column(Boolean, default=True)
+    ativa = Column(Boolean, nullable=False, default=True, server_default="true")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 # Ponto importante aqui é o campo 'ativa',
