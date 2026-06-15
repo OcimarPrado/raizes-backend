@@ -1,0 +1,12 @@
+alembic_version
+produtos
+estoques
+unidades
+usuarios
+fidelidade
+pedidos
+fidelidade_historico
+estoque_movimentacoes
+itens_pedido
+pagamentos
+audit_logs

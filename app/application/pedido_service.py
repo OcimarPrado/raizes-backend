@@ -113,7 +113,7 @@ class PedidoService:
         ).count()
 
         # ganha cupom a cada PEDIDOS_POR_CUPOM entregas
-        if total_entregues % PEDIDOS_POR_CUPOM == 0:
+        if total_entregues > 0 and total_entregues % PEDIDOS_POR_CUPOM == 0:
             fidelidade = self.db.query(Fidelidade).filter(
                 Fidelidade.usuario_id == pedido.usuario_id
             ).first()
@@ -126,6 +126,7 @@ class PedidoService:
             fidelidade.cupons_disponiveis += 1
 
             historico = FidelidadeHistorico(
+                fidelidade_id=fidelidade.id,
                 usuario_id=pedido.usuario_id,
                 pedido_id=pedido.id,
                 tipo=TipoFidelidadeEnum.GANHO,
