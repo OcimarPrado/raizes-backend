@@ -103,8 +103,48 @@ class PedidoService:
         if novo_status == StatusPedidoEnum.ENTREGUE:
             self._processar_fidelidade(pedido)
 
-        return pedido
+    def _processar_fidelidade(self, pedido: Pedido):
+        # Conta pedidos entregues do cliente
+        total_entregues = self.db.query(Pedido).filter(
+            Pedido.usuario_id == pedido.usuario_id,
+            Pedido.status == StatusPedidoEnum.ENTREGUE
+        ).count()
 
+        if total_entregues == 0:
+            return
+
+        # Obtém ou cria registro de fidelidade
+        fidelidade = self.db.query(Fidelidade).filter(
+            Fidelidade.usuario_id == pedido.usuario_id
+        ).first()
+
+        if not fidelidade:
+            fidelidade = Fidelidade(usuario_id=pedido.usuario_id, cupons_disponiveis=0)
+            self.db.add(fidelidade)
+            self.db.flush()
+
+        # Calcula cupons devidos vs já ganhos — robusto contra entregas em lote
+        cupons_devidos = total_entregues // PEDIDOS_POR_CUPOM
+        cupons_ganhos = self.db.query(FidelidadeHistorico).filter(
+            FidelidadeHistorico.fidelidade_id == fidelidade.id,
+            FidelidadeHistorico.tipo == TipoFidelidadeEnum.GANHO
+        ).count()
+
+        novos_cupons = cupons_devidos - cupons_ganhos
+        if novos_cupons <= 0:
+            return
+
+        fidelidade.cupons_disponiveis += novos_cupons
+
+        historico = FidelidadeHistorico(
+            fidelidade_id=fidelidade.id,
+            usuario_id=pedido.usuario_id,
+            pedido_id=pedido.id,
+            tipo=TipoFidelidadeEnum.GANHO,
+            cupons=novos_cupons
+        )
+        self.db.add(historico)
+        self.db.commit()
     def _processar_fidelidade(self, pedido: Pedido):
         # conta pedidos entregues do cliente
         total_entregues = self.db.query(Pedido).filter(
