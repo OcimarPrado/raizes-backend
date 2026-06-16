@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routers import usuario_router, auth_router, produto_router, unidade_router, estoque_router, pedido_router
 from app.api.routers.pagamento_router import router as pagamento_router
@@ -29,6 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(IntegrityError, integrity_error_handler)
 app.add_exception_handler(Exception, generic_exception_handler)

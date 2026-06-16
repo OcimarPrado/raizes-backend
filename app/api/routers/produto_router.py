@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+
+from fastapi import APIRouter, Depends, UploadFile, File, status, HTTPException
 from sqlalchemy.orm import Session
+import os
+import uuid
 
 from app.infrastructure.database.connection import get_db
 from app.api.dependencies.auth import get_current_user
@@ -27,7 +30,6 @@ def criar_produto_novo(
     novo_produto = Produto(**produto_que_chegou.model_dump())
     item_salvo = repositorio.salvar_no_banco(novo_produto)
 
-    # Cria registro de estoque zerado em todas as unidades ativas
     unidades = db.query(Unidade).filter(Unidade.ativa == True).all()
     for unidade in unidades:
         estoque = Estoque(
@@ -46,10 +48,28 @@ def criar_produto_novo(
 @router.get("/", response_model=list[ProdutoResponse])
 def listar_todos_os_produtos(db: Session = Depends(get_db)):
     """
-    Rota pública — lista todos os produtos ativos do cardápio.
+    Rota pública — lista todos os produtos do cardápio.
     """
     repositorio = ProdutoRepository(db)
     return repositorio.buscar_todos()
+
+
+@router.post("/upload-imagem")
+def upload_imagem(file: UploadFile = File(...)):
+    """
+    Recebe um arquivo de imagem e salva em /uploads, retornando a URL pública.
+    """
+    upload_dir = "uploads"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    file_path = os.path.join(upload_dir, filename)
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(file.file.read())
+
+    return {"url": f"/uploads/{filename}"}
 
 
 @router.put("/{produto_id}", response_model=ProdutoResponse)
@@ -60,7 +80,7 @@ def atualizar_produto(
     current_user: Usuario = Depends(get_current_user)
 ):
     """
-    Atualiza dados de um produto existente.
+    Atualiza dados de um produto existente, incluindo imagem.
     """
     repositorio = ProdutoRepository(db)
     produto_existente = repositorio.buscar_por_id(produto_id)
@@ -71,7 +91,8 @@ def atualizar_produto(
     produto_existente.descricao = produto_atualizado.descricao
     produto_existente.preco = produto_atualizado.preco
     produto_existente.categoria = produto_atualizado.categoria
-    produto_existente.imagem_url = produto_atualizado.imagem_url if hasattr(produto_atualizado, 'imagem_url') else produto_existente.imagem_url
+    if hasattr(produto_atualizado, "imagem_url"):
+        produto_existente.imagem_url = produto_atualizado.imagem_url
 
     return repositorio.atualizar(produto_existente)
 
@@ -90,7 +111,7 @@ def deletar_produto(
     if not produto:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Produto com ID {produto_id} não encontrado."
+            detail=f"Produto com ID {produto_id} não encontrado no cardápio."
         )
     repositorio.deletar(produto)
     return None

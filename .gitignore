@@ -5,3 +5,4 @@ __pycache__/
 .env
 app/infrastructure/database/schema.sql
 app/infrastructure/database/migrations/versions/*.py
+uploads/
