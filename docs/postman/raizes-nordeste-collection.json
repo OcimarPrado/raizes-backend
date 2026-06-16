@@ -1,0 +1,627 @@
+{
+  "info": {
+    "_postman_id": "ca1e0895-255e-49e7-9ef6-222b49c0f1a6",
+    "name": "Raízes do Nordeste — API",
+    "description": "Coleção de testes para o sistema de gerenciamento de rede de lanchonetes nordestina. Projeto acadêmico ADS — UNINTER.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48466851",
+    "_collection_link": "https://go.postman.co/collection/48466851-ca1e0895-255e-49e7-9ef6-222b49c0f1a6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 — POSITIVO — Login gerente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna access_token', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('access_token');",
+              "  pm.collectionVariables.set('token_gerente', json.access_token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "gerente@raizes.com"
+            },
+            {
+              "key": "password",
+              "value": "gerente123"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 — POSITIVO — Login cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna access_token', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('access_token');",
+              "  pm.collectionVariables.set('token_cliente', json.access_token);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "onprado39@gmail.com"
+            },
+            {
+              "key": "password",
+              "value": "060522"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 — NEGATIVO — Login senha incorreta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));",
+              "pm.test('Mensagem de erro presente', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('detail');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "gerente@raizes.com"
+            },
+            {
+              "key": "password",
+              "value": "senhaerrada"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 — POSITIVO — Listar cardápio (público)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna lista de produtos', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.be.an('array');",
+              "  pm.expect(json.length).to.be.greaterThan(0);",
+              "});",
+              "pm.test('Produto tem campos obrigatórios', () => {",
+              "  const p = pm.response.json()[0];",
+              "  pm.expect(p).to.include.keys('id','nome','preco','categoria','ativo');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/produtos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "produtos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 — POSITIVO — Criar produto (GERENTE)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('Produto criado com nome correto', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.nome).to.eql('Pamonha Nordestina');",
+              "  pm.expect(json).to.have.property('id');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nome\": \"Pamonha Nordestina\", \"descricao\": \"Feita com milho verde e queijo\", \"preco\": 9.50, \"categoria\": \"LANCHES\", \"ativo\": true}"
+        },
+        "url": {
+          "raw": "{{base_url}}/produtos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "produtos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 — NEGATIVO — Criar produto sem autenticação",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 401 Unauthorized', () => pm.response.to.have.status(401));",
+              "pm.test('Acesso negado sem token', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('detail');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nome\": \"Produto Teste\", \"preco\": 10.00, \"categoria\": \"LANCHES\", \"ativo\": true}"
+        },
+        "url": {
+          "raw": "{{base_url}}/produtos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "produtos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 — POSITIVO — Criar pedido (cliente autenticado)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('Pedido criado com status AGUARDANDO_PAGAMENTO', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.status).to.eql('AGUARDANDO_PAGAMENTO');",
+              "  pm.expect(json.total).to.be.a('string');",
+              "  pm.collectionVariables.set('pedido_id', json.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"unidade_id\": 1, \"canal_pedido\": \"APP\", \"itens\": [{\"produto_id\": 1, \"quantidade\": 2}]}"
+        },
+        "url": {
+          "raw": "{{base_url}}/pedidos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pedidos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 — POSITIVO — Pagamento PIX (sempre aprovado)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('Pagamento aprovado via PIX', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.status).to.eql('APROVADO');",
+              "  pm.expect(json.metodo).to.eql('PIX');",
+              "  pm.expect(json.resposta_mock).to.be.a('string');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"pedido_id\": {{pedido_id}}, \"metodo\": \"PIX\"}"
+        },
+        "url": {
+          "raw": "{{base_url}}/pagamentos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pagamentos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 — NEGATIVO — Pagar pedido já pago",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('Mensagem de erro para pagamento duplicado', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.detail).to.include('já possui um pagamento aprovado');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"pedido_id\": {{pedido_id}}, \"metodo\": \"PIX\"}"
+        },
+        "url": {
+          "raw": "{{base_url}}/pagamentos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pagamentos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 — NEGATIVO — Método de pagamento inválido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 400 Bad Request', () => pm.response.to.have.status(400));",
+              "pm.test('Mensagem de método inválido', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.detail).to.include('Método inválido');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"pedido_id\": 1, \"metodo\": \"BOLETO\"}"
+        },
+        "url": {
+          "raw": "{{base_url}}/pagamentos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "pagamentos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 — POSITIVO — Consultar saldo de fidelidade",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna saldo de cupons', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.have.property('cupons_disponiveis');",
+              "  pm.expect(json.cupons_disponiveis).to.be.a('number');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/fidelidade/me",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "fidelidade",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 — POSITIVO — Listar logs de auditoria (GERENTE)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Retorna lista de logs', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json).to.be.an('array');",
+              "});",
+              "pm.test('Log tem campos obrigatórios', () => {",
+              "  if (pm.response.json().length > 0) {",
+              "    const log = pm.response.json()[0];",
+              "    pm.expect(log).to.have.property('acao');",
+              "    pm.expect(log).to.have.property('entidade');",
+              "    pm.expect(log).to.have.property('criado_em');",
+              "  }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_gerente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/audit-logs/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "audit-logs",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 — NEGATIVO — Audit logs sem permissão de GERENTE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status 403 Forbidden', () => pm.response.to.have.status(403));",
+              "pm.test('Acesso negado para não-gerente', () => {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.detail).to.include('GERENTE');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token_cliente}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/audit-logs/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "audit-logs",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "token_gerente",
+      "value": ""
+    },
+    {
+      "key": "token_cliente",
+      "value": ""
+    },
+    {
+      "key": "pedido_id",
+      "value": ""
+    }
+  ]
+}
