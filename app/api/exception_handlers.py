@@ -2,6 +2,9 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
+'''
+Verifica os erros e retorna ao usuário o codigo de erro e a mensagem de erro correspondente.
+'''
 
 def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = [{"campo": " → ".join(str(loc) for loc in e["loc"]), "mensagem": e["msg"], "tipo": e["type"]} for e in exc.errors()]

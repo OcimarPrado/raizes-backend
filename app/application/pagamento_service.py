@@ -6,7 +6,9 @@ from app.infrastructure.repositories.audit_log_repository import AuditLogReposit
 
 METODOS_GARANTIDOS = {"PIX", "DINHEIRO"}
 MOTIVOS_RECUSA = ["Saldo insuficiente", "Cartão bloqueado", "Limite diário atingido", "Não autorizada pelo banco"]
-
+'''
+Gerencia o processamento de pagamento, qualificando APROVADO e NÃO APROVADO, com alguns tratamentos de regras de negócio.
+'''
 class PagamentoService:
     @staticmethod
     def processar(db: Session, dados: PagamentoCreate, usuario_id: int, ip) -> Pagamento:
