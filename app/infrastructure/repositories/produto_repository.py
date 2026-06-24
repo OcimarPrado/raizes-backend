@@ -27,7 +27,8 @@ class ProdutoRepository:
         """
         Vai até a prateleira e traz a lista de todos os produtos cadastrados.
         """
-        return self.db.query(Produto).all()
+        return self.db.query(Produto).filter(Produto.ativo == True).all()
+        
     
     def buscar_todos(self):
         """
@@ -35,7 +36,8 @@ class ProdutoRepository:
         """
 
         # O SQLAlchemy faz a tradução para SQL 
-        return self.db.query(Produto).all()
+        return self.db.query(Produto).filter(Produto.ativo == True).all()
+        
 
     def buscar_por_id(self, produto_id: int):
         """
