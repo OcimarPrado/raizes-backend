@@ -9,7 +9,7 @@ from app.api.dependencies.auth import get_current_user
 from app.application.schemas.produto_schema import ProdutoCreate, ProdutoResponse
 from app.infrastructure.repositories.produto_repository import ProdutoRepository
 from app.domain.produto import Produto
-from app.domain.estoque import Estoque
+from app.domain.estoque import Estoque, EstoqueMovimentacao
 from app.domain.unidade import Unidade
 from app.infrastructure.repositories.usuario_repository import Usuario
 
@@ -30,6 +30,9 @@ def criar_produto_novo(
     novo_produto = Produto(**produto_que_chegou.model_dump())
     item_salvo = repositorio.salvar_no_banco(novo_produto)
 
+    # Cria registro de estoque zerado em todas as unidades ativas.
+    # Isso garante que o produto já aparece no painel de estoque
+    # de cada unidade, pronto para receber entrada de quantidade.
     unidades = db.query(Unidade).filter(Unidade.ativa == True).all()
     for unidade in unidades:
         estoque = Estoque(
@@ -105,13 +108,38 @@ def deletar_produto(
 ):
     """
     Remove um produto do cardápio.
+
+    Antes de excluir o produto, remove também os registros de estoque
+    e movimentações vinculados a ele. Produtos que já foram incluídos
+    em pedidos não podem ser excluídos — nesses casos, use a opção
+    de desativar o produto (campo 'ativo = false').
     """
     repositorio = ProdutoRepository(db)
     produto = repositorio.buscar_por_id(produto_id)
+
     if not produto:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Produto com ID {produto_id} não encontrado no cardápio."
         )
+
+    # Verifica se o produto já foi usado em algum pedido.
+    # Se sim, não permite exclusão para preservar o histórico financeiro.
+    from app.domain.pedido import ItemPedido
+    if db.query(ItemPedido).filter(ItemPedido.produto_id == produto_id).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este produto já foi utilizado em pedidos e não pode ser excluído. Desative-o alterando o campo 'ativo' para false."
+        )
+
+    # Remove as movimentações de estoque vinculadas antes de remover o estoque.
+    estoques = db.query(Estoque).filter(Estoque.produto_id == produto_id).all()
+    for e in estoques:
+        db.query(EstoqueMovimentacao).filter(
+            EstoqueMovimentacao.estoque_id == e.id
+        ).delete()
+    db.query(Estoque).filter(Estoque.produto_id == produto_id).delete()
+    db.flush()
+
     repositorio.deletar(produto)
     return None

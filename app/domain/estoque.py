@@ -1,99 +1,114 @@
+import enum
 from datetime import datetime
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    ForeignKey,
-    Text
-)
-
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from app.infrastructure.database.connection import Base
 
 
-class AuditLog(Base):
+# Definimos os tipos de movimentação como Enum para garantir que
+# apenas valores válidos sejam registrados no banco.
+# ENTRADA = produtos chegando ao estoque
+# SAIDA = produtos saindo (venda, descarte, etc.)
+class TipoMovimentacaoEnum(str, enum.Enum):
+    ENTRADA = "ENTRADA"
+    SAIDA = "SAIDA"
+
+
+class Estoque(Base):
     """
-    Entidade responsável por armazenar os registros de auditoria do sistema.
+    Representa o saldo de um produto em uma unidade específica da rede.
 
-    O objetivo desta tabela é manter um histórico das ações realizadas
-    pelos usuários, permitindo rastreabilidade, controle operacional
-    e apoio em processos de auditoria e segurança.
+    Cada unidade da rede Raízes do Nordeste mantém seu próprio controle
+    de estoque por produto. Isso significa que o mesmo produto pode ter
+    quantidades diferentes em cada loja.
 
-    Cada registro representa um evento importante ocorrido no sistema.
+    Exemplo: Baião de Dois pode ter 50 unidades no Centro e 30 na Aldeota.
     """
 
-    # Nome da tabela que será criada no banco de dados.
-    __tablename__ = "audit_logs"
+    __tablename__ = "estoques"
 
-    # Identificador único do registro de auditoria.
-    id = Column(
+    # Identificador único deste registro de estoque.
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Qual produto estamos controlando neste registro.
+    produto_id = Column(
         Integer,
-        primary_key=True,
-        index=True
-    )
-
-    # Usuário responsável pela ação registrada.
-    # Pode ser nulo em situações onde a ação foi executada
-    # automaticamente pelo sistema.
-    usuario_id = Column(
-        Integer,
-        ForeignKey("usuarios.id"),
-        nullable=True
-    )
-
-    # Descreve a ação executada.
-    # Exemplos:
-    # - CRIAR
-    # - EDITAR
-    # - EXCLUIR
-    # - LOGIN
-    # - PAGAMENTO_APROVADO
-    acao = Column(
-        String(100),
+        ForeignKey("produtos.id"),
         nullable=False
     )
 
-    # Identifica qual entidade do sistema foi afetada.
-    # Exemplos:
-    # - Usuario
-    # - Pedido
-    # - Produto
-    # - Pagamento
-    entidade = Column(
-        String(50),
+    # Em qual unidade da rede esse estoque pertence.
+    unidade_id = Column(
+        Integer,
+        ForeignKey("unidades.id"),
         nullable=False
     )
 
-    # Identificador do registro afetado pela operação.
-    # Permite localizar exatamente qual objeto sofreu alteração.
-    entidade_id = Column(
+    # Quantidade atual disponível para venda nesta unidade.
+    # Esse valor é atualizado a cada entrada ou saída registrada.
+    quantidade_disponivel = Column(Integer, nullable=False, default=0)
+
+    # Quantidade mínima de alerta. Quando o estoque ficar abaixo
+    # desse valor, o gerente deve ser notificado para repor.
+    quantidade_minima = Column(Integer, nullable=False, default=5)
+
+    # Data da última atualização deste registro de estoque.
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    # Relacionamentos para facilitar consultas no ORM
+    produto = relationship("Produto")
+    unidade = relationship("Unidade")
+    movimentacoes = relationship("EstoqueMovimentacao", back_populates="estoque")
+
+
+class EstoqueMovimentacao(Base):
+    """
+    Registra cada entrada ou saída de produtos no estoque.
+
+    Toda vez que um produto entra ou sai do estoque de uma unidade,
+    um registro é criado aqui. Isso permite rastrear o histórico
+    completo de movimentações e auditar qualquer divergência.
+
+    Exemplos de uso:
+    - Recebimento de mercadoria: ENTRADA de 100 unidades de Baião de Dois
+    - Venda realizada: SAIDA de 2 unidades ao criar um pedido
+    - Descarte por vencimento: SAIDA com observação explicando o motivo
+    """
+
+    __tablename__ = "estoque_movimentacoes"
+
+    # Identificador único da movimentação.
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Qual registro de estoque foi afetado por esta movimentação.
+    estoque_id = Column(
         Integer,
-        nullable=True
+        ForeignKey("estoques.id"),
+        nullable=False
     )
 
-    # Campo livre para armazenar informações adicionais
-    # sobre o evento ocorrido.
-    #
-    # Exemplos:
-    # - Valores alterados
-    # - Motivo da operação
-    # - Dados relevantes para investigação futura
-    detalhe = Column(
-        Text,
-        nullable=True
+    # Tipo da movimentação: entrada (acréscimo) ou saída (decréscimo).
+    tipo = Column(
+        Enum(TipoMovimentacaoEnum),
+        nullable=False
     )
 
-    # Endereço IP de origem da ação.
-    # Auxilia em auditorias, monitoramento e rastreamento
-    # de operações realizadas pelos usuários.
-    ip = Column(
-        String(45),
-        nullable=True
+    # Quantidade de unidades movimentadas nesta operação.
+    quantidade = Column(Integer, nullable=False)
+
+    # Campo opcional para registrar o motivo ou contexto da movimentação.
+    # Exemplos: "Pedido #42", "Recebimento NF 1234", "Descarte - vencimento"
+    observacao = Column(String, nullable=True)
+
+    # Data e hora em que a movimentação foi registrada.
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
     )
 
-    # Data e horário em que o evento foi registrado.
-    # O horário é armazenado em UTC para manter
-    # consistência entre diferentes regiões e servidores.
-    criado_em = Column(
-        DateTime,
-        default=datetime.utcnow)
+    # Relacionamento com o registro de estoque pai.
+    estoque = relationship("Estoque", back_populates="movimentacoes")
