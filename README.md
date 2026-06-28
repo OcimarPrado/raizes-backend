@@ -140,3 +140,6 @@ app/
 sair
 exit
 \q
+## Interface do Usuário (Front-End)
+Este projeto possui uma interface web correspondente para consumo da API.
+- Repositório Front-End: https://github.com/OcimarPrado/raizes-frontend
