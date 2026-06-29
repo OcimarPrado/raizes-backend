@@ -140,6 +140,16 @@ app/
 sair
 exit
 \q
+
+## 🔒 Privacidade e Conformidade LGPD
+
+A API "Raízes do Nordeste" foi desenvolvida priorizando a segurança e a privacidade dos dados pessoais, em conformidade com os princípios da Lei Geral de Proteção de Dados (LGPD). As principais medidas implementadas incluem:
+
+* **Minimização de Dados:** Coletamos apenas as informações estritamente necessárias para a operação dos serviços[cite: 1].
+* **Autenticação Segura:** Utilizamos JSON Web Tokens (JWT) para garantir que apenas usuários autenticados acessem recursos restritos[cite: 1].
+* **Segurança no Armazenamento:** As senhas dos usuários são armazenadas utilizando *hashing* com BCrypt, garantindo que não fiquem expostas em formato legível[cite: 1].
+* **Rastreabilidade:** Implementamos logs de auditoria para ações sensíveis, garantindo a transparência e segurança do fluxo de dados[cite: 1].
+
 ## Interface do Usuário (Front-End)
 Este projeto possui uma interface web correspondente para consumo da API.
 - Repositório Front-End: https://github.com/OcimarPrado/raizes-frontend
